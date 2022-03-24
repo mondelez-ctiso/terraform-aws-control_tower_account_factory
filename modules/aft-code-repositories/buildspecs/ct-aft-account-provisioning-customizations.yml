@@ -20,7 +20,7 @@ phases:
       - ROLE_SESSION_NAME=$(aws ssm get-parameter --name /aft/resources/iam/aft-session-name | jq --raw-output ".Parameter.Value")
       - aws ssm get-parameter --name /aft/config/terraform/spacelift-terraformrc --with-decryption | jq --raw-output ".Parameter.Value" > ~/.terraformrc
       - |
-        ssh_key_parameter=$(aws ssm get-parameter --name /aft/config/aft-ssh-key --with-decryption || echo "None")
+        ssh_key_parameter=$(aws ssm get-parameter --name /aft/config/aft-ssh-key --with-decryption 2> /dev/null || echo "None")
         if [[ $ssh_key_parameter != "None" ]]; then
           ssh_key=$(jq --raw-output ".Parameter.Value" <<< $ssh_key_parameter)
           mkdir -p ~/.ssh

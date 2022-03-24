@@ -85,6 +85,7 @@ module "aft_code_repositories" {
   account_customizations_repo_branch              = var.account_customizations_repo_branch
   global_customizations_repo_branch               = var.global_customizations_repo_branch
   log_group_retention                             = var.cloudwatch_log_group_retention
+  global_codebuild_timeout                        = var.global_codebuild_timeout
 }
 
 module "aft_customizations" {
@@ -118,6 +119,7 @@ module "aft_customizations" {
   maximum_concurrent_customizations                 = var.maximum_concurrent_customizations
   customizations_archive_path                       = module.packaging.customizations_archive_path
   customizations_archive_hash                       = module.packaging.customizations_archive_hash
+  global_codebuild_timeout                          = var.global_codebuild_timeout
 }
 
 module "aft_feature_options" {
