@@ -182,6 +182,7 @@ module "aft_ssm_parameters" {
     aws = aws.aft_management
   }
   source                                                      = "./modules/aft-ssm-parameters"
+  depends_on                                                  = [module.aft_feature_options]
   aft_request_queue_name                                      = module.aft_account_request_framework.request_queue_name
   aft_request_table_name                                      = module.aft_account_request_framework.request_table_name
   aft_request_audit_table_name                                = module.aft_account_request_framework.request_audit_table_name
