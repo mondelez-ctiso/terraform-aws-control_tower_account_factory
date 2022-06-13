@@ -1,12 +1,21 @@
 # Copyright Amazon.com, Inc. or its affiliates. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 4.9.0"
+    }
+  }
+}
 variable "trusted_entity_type" {
   default = "AWS"
 }
 
 variable "role_name" {
-  default = "AWSAFTExecution"
+  default = "AWSAFTService"
 }
 
 variable "trusted_entity" {
