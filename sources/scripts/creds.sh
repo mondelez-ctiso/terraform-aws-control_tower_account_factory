@@ -27,21 +27,21 @@ do
             USER_DEFINED_ACCOUNT_ID=$2
             echo $ACCOUNT_ID
             ;;
-    --aft-mgmt)
-      AFT=true
-      ;;
-    --ct-mgmt)
-      CT=true
-      ;;
-    --ct-audit)
-      AUDIT=true
-      ;;
-    --ct-log-archive)
-      LOG_ARCHIVE=true
-      ;;
-    --no-purge)
-      NO_PURGE=true
-      ;;
+        --aft-mgmt)
+          AFT=true
+          ;;
+        --ct-mgmt)
+          CT=true
+          ;;
+        --ct-audit)
+          AUDIT=true
+          ;;
+        --ct-log-archive)
+          LOG_ARCHIVE=true
+          ;;
+        --no-purge)
+          NO_PURGE=true
+          ;;
         --help)
             echo ""
             echo "creds.sh creates an AWS CLI credential file leveraging AWSAFTExecutionRole for specified accounts"
