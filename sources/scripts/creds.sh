@@ -9,6 +9,7 @@ AFT=false
 CT=false
 AUDIT=false
 LOG_ARCHIVE=false
+NO_PURGE=
 
 #Ensure at option was specified
 if [ $# -eq 0 ]; then
@@ -38,6 +39,9 @@ do
 		--ct-log-archive)
 			LOG_ARCHIVE=true
 			;;
+    --no-purge)
+      NO_PURGE=true
+      ;;
         --help)
             echo ""
             echo "creds.sh creates an AWS CLI credential file leveraging AWSAFTExecutionRole for specified accounts"
@@ -59,7 +63,9 @@ done
 
 # Remove Credentials file, if exists
 mkdir -p ~/.aws
-rm -f ~/.aws/credentials
+if [ -z "$NO_PURGE" ]; then
+  rm -f ~/.aws/credentials
+fi
 
 #Lookup SSM Parameters
 AFT_MGMT_ROLE=$(aws ssm get-parameter --name /aft/resources/iam/aft-administrator-role-name | jq --raw-output ".Parameter.Value")
