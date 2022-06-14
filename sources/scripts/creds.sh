@@ -21,24 +21,24 @@ fi
 #Parse options and set flags
 while [ ! $# -eq 0 ]
 do
-	case "$1" in
+  case "$1" in
         --account-id)
             USER_DEFINED_ACCOUNT=true
             USER_DEFINED_ACCOUNT_ID=$2
             echo $ACCOUNT_ID
             ;;
-		--aft-mgmt)
-			AFT=true
-			;;
-		--ct-mgmt)
-			CT=true
-			;;
-		--ct-audit)
-			AUDIT=true
-			;;
-		--ct-log-archive)
-			LOG_ARCHIVE=true
-			;;
+    --aft-mgmt)
+      AFT=true
+      ;;
+    --ct-mgmt)
+      CT=true
+      ;;
+    --ct-audit)
+      AUDIT=true
+      ;;
+    --ct-log-archive)
+      LOG_ARCHIVE=true
+      ;;
     --no-purge)
       NO_PURGE=true
       ;;
@@ -52,13 +52,13 @@ do
             echo ""
             echo "--account-id - Create a default credential profile for the given account number.   Profile name: default"
             echo "--aft-mgmt   - Create a credential profile for AFT Management account.             Profile name: aft-management"
-			      echo "--ct-mgmt    - Create a credential profile for Control Tower Management account.   Profile name: ct-management"
-			      echo "--audit      - Create a credential profile for Control Tower Audit account.        Profile name: ct-audit"
-			      echo "--log        - Create a credential profile for Control Tower Log Archive account.  Profile name: ct-log-archive"
+            echo "--ct-mgmt    - Create a credential profile for Control Tower Management account.   Profile name: ct-management"
+            echo "--audit      - Create a credential profile for Control Tower Audit account.        Profile name: ct-audit"
+            echo "--log        - Create a credential profile for Control Tower Log Archive account.  Profile name: ct-log-archive"
             exit
-			;;
-	esac
-	shift
+      ;;
+  esac
+  shift
 done
 
 # Remove Credentials file, if exists
