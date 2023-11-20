@@ -10,7 +10,7 @@ from boto3.session import Session
 
 logger = logging.getLogger("aft")
 
-AFT_CUSTOMIZATIONS_PIPELINE_NAME_PATTERN = "^\d\d\d\d\d\d\d\d\d\d\d\d-.*$"
+AFT_CUSTOMIZATIONS_PIPELINE_NAME_PATTERN = r"^\d\d\d\d\d\d\d\d\d\d\d\d-.*$"
 
 
 def get_pipeline_for_account(session: Session, account_id: str) -> str:
@@ -50,14 +50,16 @@ def pipeline_is_running(session: Session, name: str) -> bool:
 
     logger.info("Getting pipeline executions for " + name)
 
-    response = client.list_pipeline_executions(pipelineName=name)
-    pipeline_execution_summaries = response["pipelineExecutionSummaries"]
+    client = session.client("codepipeline", config=utils.get_high_retry_botoconfig())
+    paginator = client.get_paginator("list_pipeline_executions")
 
-    while "nextToken" in response:
-        response = client.list_pipeline_executions(
-            pipelineName=name, nextToken=response["nextToken"]
-        )
-        pipeline_execution_summaries.extend(response["pipelineExecutionSummaries"])
+    pipeline_execution_summaries = []
+    for page in paginator.paginate(pipelineName=name):
+        pipeline_execution_summaries.extend(page["pipelineExecutionSummaries"])
+
+    if not pipeline_execution_summaries:
+        # No executions for this pipeline in the last 12 months, so cannot be currently running
+        return False
 
     latest_execution = sorted(
         pipeline_execution_summaries, key=lambda i: i["startTime"], reverse=True  # type: ignore
@@ -82,18 +84,17 @@ def execute_pipeline(session: Session, account_id: str) -> None:
 
 
 def list_pipelines(session: Session) -> List[Any]:
-    pattern = re.compile(AFT_CUSTOMIZATIONS_PIPELINE_NAME_PATTERN)
-    matched_pipelines = []
-    client = session.client("codepipeline")
     logger.info("Listing Pipelines - ")
 
-    response = client.list_pipelines()
+    client = session.client("codepipeline", config=utils.get_high_retry_botoconfig())
+    paginator = client.get_paginator("list_pipelines")
 
-    pipelines = response["pipelines"]
-    while "nextToken" in response:
-        response = client.list_pipelines(nextToken=response["nextToken"])
-        pipelines.extend(response["pipelines"])
+    pipelines = []
+    for page in paginator.paginate():
+        pipelines.extend(page["pipelines"])
 
+    pattern = re.compile(AFT_CUSTOMIZATIONS_PIPELINE_NAME_PATTERN)
+    matched_pipelines = []
     for p in pipelines:
         if re.match(pattern, p["name"]):
             matched_pipelines.append(p["name"])
