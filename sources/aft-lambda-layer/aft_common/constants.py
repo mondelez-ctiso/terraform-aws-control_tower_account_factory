@@ -66,3 +66,5 @@ SSM_PARAM_ACCOUNT_TERRAFORM_VERSION = "/aft/config/terraform/version"
 SSM_PARAM_AFT_METRICS_REPORTING = "/aft/config/metrics-reporting"
 SSM_PARAM_AFT_METRICS_REPORTING_UUID = "/aft/config/metrics-reporting-uuid"
 SSM_PARAMETER_PATH = "/aft/account-request/custom-fields/"
+ACCOUNT_TAGS_SSM_PARAMETER_PATH = "/aft/account-request/account-tags/"
+

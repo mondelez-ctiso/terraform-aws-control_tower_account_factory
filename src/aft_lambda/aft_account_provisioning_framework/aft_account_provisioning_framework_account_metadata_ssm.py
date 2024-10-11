@@ -10,6 +10,7 @@ from aft_common import notifications
 from aft_common.account_provisioning_framework import ProvisionRoles
 from aft_common.auth import AuthClient
 from aft_common.constants import SSM_PARAMETER_PATH
+from aft_common.constants import ACCOUNT_TAGS_SSM_PARAMETER_PATH
 from aft_common.logger import customization_request_logger
 from aft_common.ssm import (
     delete_ssm_parameters,
@@ -29,7 +30,9 @@ def lambda_handler(event: Dict[str, Any], context: LambdaContext) -> None:
     target_account_id = event_payload["account_info"]["account"]["id"]
     account_request = event_payload["account_request"]
     custom_fields = json.loads(account_request.get("custom_fields", "{}"))
-
+    # MDLZ customizations - store all account_tags as SSM paremeters in the account
+    account_tags = json.loads(account_request.get("account_tags", "{}"))
+    
     logger = customization_request_logger(
         aws_account_id=target_account_id, customization_request_id=request_id
     )
@@ -50,7 +53,10 @@ def lambda_handler(event: Dict[str, Any], context: LambdaContext) -> None:
                         "ssm:DeleteParameters",
                     ],
                     "Effect": "Allow",
-                    "Resource": f"arn:{utils.get_aws_partition(session)}:ssm:{target_region}:{target_account_id}:parameter{SSM_PARAMETER_PATH}*",
+                    "Resource": [
+                        f"arn:{utils.get_aws_partition(session)}:ssm:{target_region}:{target_account_id}:parameter{SSM_PARAMETER_PATH}*",
+                        f"arn:{utils.get_aws_partition(session)}:ssm:{target_region}:{target_account_id}:parameter{ACCOUNT_TAGS_SSM_PARAMETER_PATH}*"
+                    ],
                 },
                 {
                     "Action": [
@@ -68,21 +74,29 @@ def lambda_handler(event: Dict[str, Any], context: LambdaContext) -> None:
             role_name=ProvisionRoles.SERVICE_ROLE_NAME,
         )
 
-        params = get_ssm_parameters_names_by_path(
-            target_account_session, SSM_PARAMETER_PATH
-        )
+        parameters = {
+            SSM_PARAMETER_PATH: custom_fields,
+            ACCOUNT_TAGS_SSM_PARAMETER_PATH: account_tags,
+        }
 
-        existing_keys = set(params)
-        new_keys = set(custom_fields.keys())
+        # Looping through the dictionary
+        for param_path, fields in parameters.items():
 
-        # Delete SSM parameters which do not exist in new custom fields
-        params_to_remove = list(existing_keys.difference(new_keys))
-        logger.info(f"Deleting SSM params: {params_to_remove}")
-        delete_ssm_parameters(target_account_session, params_to_remove)
+            params = get_ssm_parameters_names_by_path(
+                target_account_session, param_path
+            )
 
-        # Update / Add SSM parameters for custom fields provided
-        logger.info(f"Adding/Updating SSM params: {custom_fields}")
-        put_ssm_parameters(target_account_session, custom_fields)
+            existing_keys = set(params)
+            new_keys = set(fields.keys())
+
+            # Delete SSM parameters which do not exist in new custom fields
+            params_to_remove = list(existing_keys.difference(new_keys))
+            logger.info(f"Deleting SSM params: {params_to_remove}")
+            delete_ssm_parameters(target_account_session, params_to_remove)
+
+            # Update / Add SSM parameters for custom fields provided
+            logger.info(f"Adding/Updating SSM params: {fields}")
+            put_ssm_parameters(target_account_session, fields)
 
     except Exception as error:
         notifications.send_lambda_failure_sns_message(
