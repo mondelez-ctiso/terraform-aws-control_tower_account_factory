@@ -16,12 +16,12 @@ logger = logging.getLogger("aft")
 
 
 @resubmit_request_on_boto_throttle
-def put_ssm_parameters(session: Session, parameters: Dict[str, str], path: str = SSM_PARAMETER_PATH) -> None:
+def put_ssm_parameters(session: Session, parameters: Dict[str, str]) -> None:
     client = session.client("ssm", config=get_high_retry_botoconfig())
 
     for key, value in parameters.items():
         response = client.put_parameter(
-            Name=path + key, Value=value, Type="String", Overwrite=True, Tier="Intelligent-Tiering"
+            Name=SSM_PARAMETER_PATH + key, Value=value, Type="String", Overwrite=True, Tier="Intelligent-Tiering"
         )
 
 
